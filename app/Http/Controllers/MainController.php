@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
 use App\Models\User;
 use App\Traits\Generics;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ class MainController extends Controller
         $errorMess = $this->validatorFails($validator);
         if ($errorMess) {
             return $errorMess;
-        } else {;
+        } else {
             if (User::where('email', $request->email)->exists()) {
                 if (!$token = Auth::attempt($validator->validated())) {
                     return response([
@@ -82,6 +83,73 @@ class MainController extends Controller
                     'data' => NULL
                 ], 422);
             }
+        }
+    }
+
+    public function organization_details()
+    {
+        $data = User::where('company_id', Auth::user()->company_id)->first();
+
+        if (!$data) {
+            return response([
+                'status' => false,
+                'message' => "Company ID does not exist",
+                'data' => NULL
+            ], 404);
+        } else {
+            return response([
+                'status' => true,
+                'message' => "Company Details fetched successfully",
+                'data' => $data
+            ], 201);
+        }
+    }
+
+    public function create_employee(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'employee_name' => 'required|string|unique:employees',
+            'employee_email' => 'required|email|unique:employees',
+            'password' => 'required|string',
+        ]);
+        //return validation error(s)
+        $errorMess = $this->validatorFails($validator);
+        if ($errorMess) {
+            return $errorMess;
+        } else {
+            $employeed_id = $this->createUniqueRand('employees', 'employee_id');
+            $organizationDet = User::where('company_id', Auth::user()->company_id)->first();
+
+            $result = Employee::create([
+                'employee_id'=>$employeed_id,
+                'employee_name'=>$request->employee_name,
+                'employee_email'=>$request->employee_email,
+                'company_id'=>Auth::user()->company_id,
+                'organization'=>$organizationDet['organization'],
+                'password'=>Hash::make($request->password)
+            ]);
+
+            if($result) {
+                return response([
+                    'status'=>true,
+                    'message'=>"A new Employee has been created for the Company ".$organizationDet['organization'],
+                    'data'=>$result
+                ], 201);
+            }
+        }
+    }
+
+    public function create_card(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+        //return validation error(s)
+        $errorMess = $this->validatorFails($validator);
+        if ($errorMess) {
+            return $errorMess;
+        } else {
         }
     }
 }

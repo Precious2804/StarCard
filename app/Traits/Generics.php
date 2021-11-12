@@ -20,6 +20,17 @@ trait Generics
             'expires_in' => Auth::factory()->getTTL() * 60000
         ], 201);
     }
+    function createNewToken2($token)
+    {
+        return response()->json([
+            'status' => true,
+            'message' => "Login Was Successful",
+            'data' => auth()->guard('employee')->user(),
+            'access_token' => 'Bearer ' . $token,
+            'token_type' => 'bearer',
+            'expires_in' =>auth()->guard('employee')->factory()->getTTL() * 60000
+        ], 201);
+    }
 
     //a method that returns any validator message
     function validatorFails($validator)
