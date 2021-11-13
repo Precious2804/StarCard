@@ -16,17 +16,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// MainController starts here
 Route::post('/register', [MainController::class, 'register'])->name('register');
 Route::post('/login', [MainController::class, 'login']);
-Route::post('/create_card', [MainController::class, 'create_card']);
 
 Route::middleware(['jwt'])->group(function () {
     Route::get('/organization_details', [MainController::class, 'organization_details']);
     Route::post('/create_employee', [MainController::class, 'create_employee']);
+    Route::get('/all_employees', [MainController::class, 'all_employees']);
 });
+// MainController ends here
 
 
-
+// EmployeeController starts here
 Route::post('/employee_login', [EmployeeController::class, 'employee_login']);
 Route::middleware(['jwt'])->group(function () {
+    Route::post('/create_card', [EmployeeController::class, 'create_card']);
 });
+// EmployeeController ends here

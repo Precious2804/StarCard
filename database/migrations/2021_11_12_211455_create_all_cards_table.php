@@ -15,7 +15,7 @@ class CreateAllCardsTable extends Migration
     {
         Schema::create('all_cards', function (Blueprint $table) {
             $table->id();
-            $table->uuid('card_id');
+            $table->uuid('case_id');
             $table->string('organization');
             $table->string('employee');
             $table->longText('location')->nullable();

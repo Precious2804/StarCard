@@ -121,35 +121,34 @@ class MainController extends Controller
             $organizationDet = User::where('company_id', Auth::user()->company_id)->first();
 
             $result = Employee::create([
-                'employee_id'=>$employeed_id,
-                'employee_name'=>$request->employee_name,
-                'employee_email'=>$request->employee_email,
-                'company_id'=>Auth::user()->company_id,
-                'organization'=>$organizationDet['organization'],
-                'password'=>Hash::make($request->password)
+                'employee_id' => $employeed_id,
+                'employee_name' => $request->employee_name,
+                'employee_email' => $request->employee_email,
+                'company_id' => Auth::user()->company_id,
+                'organization' => $organizationDet['organization'],
+                'password' => Hash::make($request->password)
             ]);
 
-            if($result) {
+            if ($result) {
                 return response([
-                    'status'=>true,
-                    'message'=>"A new Employee has been created for the Company ".$organizationDet['organization'],
-                    'data'=>$result
+                    'status' => true,
+                    'message' => "A new Employee has been created for the Company " . $organizationDet['organization'],
+                    'data' => $result
                 ], 201);
             }
         }
     }
 
-    public function create_card(Request $request)
+    public function all_employees()
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-        //return validation error(s)
-        $errorMess = $this->validatorFails($validator);
-        if ($errorMess) {
-            return $errorMess;
-        } else {
+        $data = Employee::where('company_id', Auth::user()->company_id)->get();
+
+        if ($data) {
+            return response([
+                'status' => true,
+                'message' => "All Employees for this Organization ",
+                'data' => $data
+            ], 201);
         }
     }
 }
