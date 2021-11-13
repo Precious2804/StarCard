@@ -59,6 +59,7 @@ class EmployeeController extends Controller
             'probability' => 'required|string',
             'impact' => 'required|string',
             'rating' => 'required|string',
+            'media' => 'mimes:png,jpg,jpeg,gif,svg,doc,docx,pdf,dwg,mp4,mp3,rvt,tiff,mpv,xls,pln,ppt,zip,rar,mpeg,dbf'
         ]);
         //return validation error(s)
         $errorMess = $this->validatorFails($validator);
@@ -66,26 +67,54 @@ class EmployeeController extends Controller
             return $errorMess;
         } else {
             $organize = Employee::where('company_id', Auth::guard('employee')->user()->company_id)->first();
-            $result = AllCards::create([
-                'case_id'=>$this->createUniqueRand('all_cards', 'case_id'),
-                'organization'=>$organize['organization'],
-                'employee'=>$organize['employee_name'],
-                'location'=>$request->location,
-                'hazard_description'=>$request->hazard_description,
-                'risked_resource'=>$request->risked_resource,
-                'probability'=>$request->probability,
-                'impact'=>$request->impact,
-                'existing_control'=>$request->existing_control,
-                'existing_prevention'=>$request->existing_prevention,
-                'rating'=>$request->rating,
-                'other_info'=>$request->other_info,
-            ]);
+            $myArray = [
+                'case_id' => $this->createUniqueRand('all_cards', 'case_id'),
+                'company_id' => Auth::guard('employee')->user()->company_id,
+                'organization' => $organize['organization'],
+                'employee' => $organize['employee_name'],
+                'location' => $request->location,
+                'hazard_description' => $request->hazard_description,
+                'risked_resource' => $request->risked_resource,
+                'probability' => $request->probability,
+                'impact' => $request->impact,
+                'existing_control' => $request->existing_control,
+                'existing_prevention' => $request->existing_prevention,
+                'rating' => $request->rating,
+                'other_info' => $request->other_info,
+            ];
 
-            return response([
-                'status'=>true,
-                'message'=>"New Star Card has been Created Successfully",
-                'data'=>$result
-            ], 201);
+            //if request has a file type
+            if ($request->file()) {
+                $name = time() . '_' . $request->media->getClientOriginalName();
+                $filePath = $request->file('media')->storeAs('uploads', $name, 'public');
+
+                $result = AllCards::create(array_merge($myArray, ['media' => '/storage/' . $filePath]));
+
+                return response([
+                    'status' => true,
+                    'message' => "New Star Card has been Created Successfully",
+                    'data' => $result
+                ], 201);
+            } else {
+                $result = AllCards::create(array_merge($myArray));
+
+                return response([
+                    'status' => true,
+                    'message' => "New Star Card has been Created Successfully",
+                    'data' => $result
+                ], 201);
+            }
         }
+    }
+
+    public function logoutEmp()
+    {
+        Auth::guard('employee')->logout();
+
+        return response([
+            'status' => true,
+            'message' => "Log Out was Successfull",
+            'data' => auth()->guard('employee')->user()
+        ]);
     }
 }

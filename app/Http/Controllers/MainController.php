@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AllCards;
 use App\Models\Employee;
 use App\Models\User;
 use App\Traits\Generics;
@@ -150,5 +151,29 @@ class MainController extends Controller
                 'data' => $data
             ], 201);
         }
+    }
+
+    public function all_cards()
+    {
+        $data = AllCards::where('company_id', Auth::user()->company_id)->get();
+
+        if ($data) {
+            return response([
+                'status' => true,
+                'message' => "The Star Card Dasboard for an organization",
+                'data' => $data
+            ], 201);
+        }
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+
+        return response([
+            'status' => true,
+            'message' => "Log Out was Successfull",
+            'data' => auth()->user()
+        ]);
     }
 }

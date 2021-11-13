@@ -11,6 +11,7 @@ class AllCards extends Model
 
     protected $fillable = [
         'case_id',
+        'company_id',
         'organization',
         'employee',
         'location',
