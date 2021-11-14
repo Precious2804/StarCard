@@ -109,8 +109,8 @@ class MainController extends Controller
     public function create_employee(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'employee_name' => 'required|string|unique:employees',
-            'employee_email' => 'required|email|unique:employees',
+            'employee_name' => 'required|string',
+            'employee_email' => 'required|email',
             'password' => 'required|string',
         ]);
         //return validation error(s)
@@ -120,22 +120,33 @@ class MainController extends Controller
         } else {
             $employeed_id = $this->createUniqueRand('employees', 'employee_id');
             $organizationDet = User::where('company_id', Auth::user()->company_id)->first();
+            $select_emp = Employee::where('employee_email', $request->employee_email)
+                ->where('company_id', Auth::user()->company_id)->first();
+                // return $select_emp;
 
-            $result = Employee::create([
-                'employee_id' => $employeed_id,
-                'employee_name' => $request->employee_name,
-                'employee_email' => $request->employee_email,
-                'company_id' => Auth::user()->company_id,
-                'organization' => $organizationDet['organization'],
-                'password' => Hash::make($request->password)
-            ]);
-
-            if ($result) {
+            if ($select_emp) {
                 return response([
-                    'status' => true,
-                    'message' => "A new Employee has been created for the Company " . $organizationDet['organization'],
-                    'data' => $result
-                ], 201);
+                    'status' => false,
+                    'message' => "This employee has already been registered to this organization",
+                    'data' => NULL
+                ]);
+            } elseif(!$select_emp) {
+                $result = Employee::create([
+                    'employee_id' => $employeed_id,
+                    'employee_name' => $request->employee_name,
+                    'employee_email' => $request->employee_email,
+                    'company_id' => Auth::user()->company_id,
+                    'organization' => $organizationDet['organization'],
+                    'password' => Hash::make($request->password)
+                ]);
+
+                if ($result) {
+                    return response([
+                        'status' => true,
+                        'message' => "A new Employee has been created for the Company " . $organizationDet['organization'],
+                        'data' => $result
+                    ], 201);
+                }
             }
         }
     }
